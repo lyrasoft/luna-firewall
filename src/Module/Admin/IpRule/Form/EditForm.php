@@ -37,11 +37,13 @@ class EditForm
     #[NS('item')]
     public function basic(Form $form): void
     {
-        $form->add('kind', ButtonRadioField::class)
+        $kindField = $form->add('kind', ButtonRadioField::class)
             ->label($this->trans('firewall.ip.rule.field.kind'))
             ->registerFromEnums(IpRuleKind::class, $this->lang)
             ->defaultValue(IpRuleKind::BLOCK_LIST)
             ->required(true);
+
+        $kindField->getOptions()[0]->data('color-class', 'btn-danger');
 
         $form->add('range', TextField::class)
             ->label($this->trans('firewall.ip.rule.field.range'))

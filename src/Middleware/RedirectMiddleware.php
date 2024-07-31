@@ -21,12 +21,12 @@ class RedirectMiddleware implements MiddlewareInterface
     public function __construct(
         protected RedirectService $redirectService,
         protected AppContext $app,
-        protected AppRequest $appRequest,
         protected bool $enabled = true,
         protected string|\BackedEnum|array|false|null $type = 'main',
         protected array|\Closure|null $list = null,
         protected bool $instantRedirect = false,
         protected array $ignores = [],
+        protected ?\Closure $afterHit = null,
     ) {
     }
 
@@ -38,10 +38,10 @@ class RedirectMiddleware implements MiddlewareInterface
         if (!$this->enabled) {
             return $handler->handle($request);
         }
-        
-        if ($this->ignores) {
-            $route = $this->appRequest->getSystemUri()->route;
 
+        $route = $this->app->getSystemUri()->route();
+
+        if ($this->ignores) {
             foreach ($this->ignores as $ignore) {
                 if (fnmatch($ignore, $route)) {
                     return $handler->handle($request);
@@ -63,24 +63,32 @@ class RedirectMiddleware implements MiddlewareInterface
             fn(Redirect $redirect) => $redirect->isNotFoundOnly()
         );
 
-        $res = $this->redirectService->matchAndRedirect($this->appRequest, $currentRedirects, $this->instantRedirect);
+        $result = $this->redirectService->matchListAndProcessRegex($route, $currentRedirects);
 
-        if ($res) {
-            return $res;
+        if ($result) {
+            [$dest, $redirect] = $result;
+
+            $this->redirectService->updateHits($redirect);
+
+            $this->runAfterHit($dest, $redirect);
+
+            return $this->app->redirect($dest, $redirect->getStatus(), $this->instantRedirect);
         }
 
         try {
             return $handler->handle($request);
         } catch (\RuntimeException $e) {
             if ($e->getCode() === 404) {
-                $res = $this->redirectService->matchAndRedirect(
-                    $this->appRequest,
-                    $deferRedirects,
-                    $this->instantRedirect
-                );
+                $result = $this->redirectService->matchListAndProcessRegex($route, $deferRedirects);
 
-                if ($res) {
-                    return $res;
+                if ($result) {
+                    [$dest, $redirect] = $result;
+
+                    $this->redirectService->updateHits($redirect);
+
+                    $this->runAfterHit($dest, $redirect);
+
+                    return $this->app->redirect($dest, $redirect->getStatus(), $this->instantRedirect);
                 }
             }
 
@@ -119,5 +127,21 @@ class RedirectMiddleware implements MiddlewareInterface
         }
 
         return $items->values();
+    }
+
+    protected function runAfterHit(string $dest, Redirect $redirect): void
+    {
+        if (!$this->afterHit) {
+            return;
+        }
+
+        $this->app->call(
+            $this->afterHit,
+            [
+                'dest' => $dest,
+                'redirect' => $redirect,
+                Redirect::class => $redirect,
+            ]
+        );
     }
 }

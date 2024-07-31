@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Windwalker\Core\Application\AppContext;
 use Windwalker\Core\Application\Context\AppRequestInterface;
 use Windwalker\DI\Attributes\Autowire;
 
@@ -19,15 +20,14 @@ use function Windwalker\response;
 class FirewallMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        protected AppRequestInterface $appRequest,
+        protected AppContext $app,
         protected FirewallService $firewallService,
-        #[Autowire]
-        protected IpRuleRepository $repository,
         protected bool $enabled = true,
         protected string|\BackedEnum|array|false|null $type = 'main',
         protected array $allowList = [],
         protected array $blockList = [],
         protected array $ignores = [],
+        protected ?\Closure $afterHit = null,
     ) {
         //
     }
@@ -37,8 +37,14 @@ class FirewallMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if (!$this->enabled) {
+            return $handler->handle($request);
+        }
+
+        $appRequest = $this->app->getAppRequest();
+
         if ($this->ignores) {
-            $route = $this->appRequest->getSystemUri()->route;
+            $route = $appRequest->getSystemUri()->route;
 
             foreach ($this->ignores as $ignore) {
                 if (fnmatch($ignore, $route)) {
@@ -47,25 +53,31 @@ class FirewallMiddleware implements MiddlewareInterface
             }
         }
 
-        if ($this->enabled) {
-            $currentIP = $this->appRequest->getClientIP();
+        $currentIP = $appRequest->getClientIP();
 
-            if ($this->type !== false) {
-                $rules = $this->repository->getFrontListSelector($this->type)
-                    ->all(IpRule::class);
+        if ($this->type !== false) {
+            [$allows, $blocks] = $this->firewallService->getAllowAndBlockList($this->type);
 
-                [$allows, $blocks] = $this->firewallService->getAllowAndBlockList($this->type);
+            $this->allowList = array_merge($this->allowList, $allows);
+            $this->blockList = array_merge($this->blockList, $blocks);
+        }
 
-                $this->allowList = array_merge($this->allowList, $allows);
-                $this->blockList = array_merge($this->blockList, $blocks);
-            }
+        if (!$this->firewallService->isAllow($currentIP, $this->allowList, $this->blockList)) {
+            $this->runAfterHit();
 
-            if (!$this->firewallService->isAllow($currentIP, $this->allowList, $this->blockList)) {
-                return response('', 403);
-            }
+            return response('', 403);
         }
 
         return $handler->handle($request);
+    }
+
+    protected function runAfterHit(): void
+    {
+        if (!$this->afterHit) {
+            return;
+        }
+
+        $this->app->call($this->afterHit);
     }
 
     public function getAllowList(): array

@@ -57,6 +57,13 @@ class Redirect implements EntityInterface
     #[Column('note')]
     protected string $note = '';
 
+    #[Column('hits')]
+    protected int $hits = 0;
+
+    #[Column('last_hit')]
+    #[CastNullable(ServerTimeCast::class)]
+    protected ?Chronos $lastHit = null;
+
     #[Column('created')]
     #[CastNullable(ServerTimeCast::class)]
     #[CreatedTime]
@@ -252,6 +259,30 @@ class Redirect implements EntityInterface
     public function setNote(string $note): static
     {
         $this->note = $note;
+
+        return $this;
+    }
+
+    public function getHits(): int
+    {
+        return $this->hits;
+    }
+
+    public function setHits(int $hits): static
+    {
+        $this->hits = $hits;
+
+        return $this;
+    }
+
+    public function getLastHit(): ?Chronos
+    {
+        return $this->lastHit;
+    }
+
+    public function setLastHit(\DateTimeInterface|string|null $lastHit): static
+    {
+        $this->lastHit = Chronos::tryWrap($lastHit);
 
         return $this;
     }

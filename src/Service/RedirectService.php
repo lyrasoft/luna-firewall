@@ -7,15 +7,19 @@ namespace Lyrasoft\Firewall\Service;
 use Lyrasoft\Firewall\Entity\Redirect;
 use Lyrasoft\Firewall\Repository\RedirectRepository;
 use Lyrasoft\Luna\Services\LocaleService;
+use Psr\Http\Message\ResponseInterface;
 use Windwalker\Core\Application\AppContext;
 use Windwalker\Core\Application\Context\AppRequestInterface;
 use Windwalker\Data\Collection;
 use Windwalker\DI\Attributes\Autowire;
 use Windwalker\DI\Attributes\Service;
 use Windwalker\Http\Response\RedirectResponse;
+use Windwalker\ORM\ORM;
 use Windwalker\Uri\UriHelper;
 use Windwalker\Utilities\Str;
 
+use function Windwalker\chronos;
+use function Windwalker\raw;
 use function Windwalker\response;
 
 #[Service]
@@ -30,9 +34,9 @@ class RedirectService
         //
     }
 
-    public function matchFromList(AppRequestInterface $request, iterable $redirects, ?array &$matches = null): ?Redirect
+    public function matchFromList(string $route, iterable $redirects, ?array &$matches = null): ?Redirect
     {
-        $route = urldecode($request->getSystemUri()->route());
+        $route = urldecode($route);
         $route = rtrim($route, '/');
 
         /** @var Redirect $redirect */
@@ -104,18 +108,16 @@ class RedirectService
     }
 
     /**
-     * @param  AppRequestInterface  $request
-     * @param  iterable<Redirect>   $redirects
-     * @param  bool                 $instant
+     * @param  string    $route
+     * @param  iterable  $redirects
      *
-     * @return  RedirectResponse|null
+     * @return  array{ 0: string, 1: Redirect }|null
      */
-    public function matchAndRedirect(
-        AppRequestInterface $request,
+    public function matchListAndProcessRegex(
+        string $route,
         iterable $redirects,
-        bool $instant = false
-    ): ?RedirectResponse {
-        $redirect = $this->matchFromList($request, $redirects, $matches);
+    ): ?array {
+        $redirect = $this->matchFromList($route, $redirects, $matches);
 
         if (!$redirect) {
             return null;
@@ -127,12 +129,47 @@ class RedirectService
             $dest = $this->replaceVariables($dest, (array) $matches);
         }
 
-        if ($instant) {
-            $this->app->redirect($dest, $redirect->getStatus(), true);
-            die;
+        return [$dest, $redirect];
+    }
+
+    /**
+     * @param  string              $route
+     * @param  iterable<Redirect>  $redirects
+     * @param  bool                $instant
+     *
+     * @return  ResponseInterface|null
+     */
+    public function matchAndRedirect(
+        string $route,
+        iterable $redirects,
+        bool $instant = false
+    ): ?ResponseInterface {
+        $result = $this->matchListAndProcessRegex($route, $redirects);
+
+        if (!$result) {
+            return null;
         }
 
-        return response()->redirect($dest, $redirect->getStatus());
+        [$dest, $redirect] = $result;
+
+        $this->updateHits($redirect);
+
+        return $this->app->redirect($dest, $redirect->getStatus(), $instant);
+    }
+
+    public function updateHits(Redirect $redirect): void
+    {
+        if (!$redirect->getId()) {
+            return;
+        }
+
+        $orm = $this->repository->getORM();
+
+        $orm->update(Redirect::class)
+            ->set('hits', raw('hits + 1'))
+            ->set('last_hit', chronos())
+            ->where('id', $redirect->getId())
+            ->execute();
     }
 
     /**
