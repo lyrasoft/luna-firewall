@@ -22,6 +22,7 @@ class RedirectMiddleware implements MiddlewareInterface
         protected RedirectService $redirectService,
         protected AppContext $app,
         protected AppRequest $appRequest,
+        protected bool $enabled = true,
         protected string|\BackedEnum|array|false|null $type = 'main',
         protected array|\Closure|null $list = null,
         protected bool $instantRedirect = false,
@@ -34,6 +35,10 @@ class RedirectMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if (!$this->enabled) {
+            return $handler->handle($request);
+        }
+        
         if ($this->ignores) {
             $route = $this->appRequest->getSystemUri()->route;
 

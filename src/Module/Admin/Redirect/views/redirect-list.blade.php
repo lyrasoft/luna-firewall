@@ -134,12 +134,14 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         {{-- SRC --}}
                         <td>
                             <div>
+                                <strong>From:</strong>
                                 <a href="{{ $nav->to('redirect_edit')->id($item->getId()) }}">
                                     {{ $item->getSrc() }}
                                 </a>
                             </div>
                             <div class="text-muted small mt-1">
-                                {{ $item->getDest() }}
+                                <strong>To:</strong>
+                                <span>{{ $item->getDest() }}</span>
                             </div>
 
                             <div class=" mt-1">

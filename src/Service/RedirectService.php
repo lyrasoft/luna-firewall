@@ -32,7 +32,7 @@ class RedirectService
 
     public function matchFromList(AppRequestInterface $request, iterable $redirects, ?array &$matches = null): ?Redirect
     {
-        $route = $request->getSystemUri()->route();
+        $route = urldecode($request->getSystemUri()->route());
         $route = rtrim($route, '/');
 
         /** @var Redirect $redirect */
