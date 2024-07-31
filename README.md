@@ -12,10 +12,14 @@
     * [Use Different Type from DB](#use-different-type-from-db)
     * [Use Custom List](#use-custom-list)
     * [Instant Redirect](#instant-redirect)
+    * [Disable](#disable)
+    * [Hook](#hook)
   * [IP Allow/Block (Firewall)](#ip-allowblock-firewall)
     * [Admin IP Rules Management](#admin-ip-rules-management)
     * [Select DB Type](#select-db-type)
     * [Custom List](#custom-list)
+    * [Disable](#disable-1)
+    * [Hook](#hook-1)
 <!-- TOC -->
 
 ## Installation
@@ -220,6 +224,32 @@ If there has some reason you can not wait `RedirectResponse` return, you may use
     ],
 ```
 
+### Disable
+
+If you wanr to disable this middleware in debug mode, add this options:
+
+```php
+        \Windwalker\DI\create(
+            RedirectMiddleware::class,
+            disabled: WINDWALKER_DEBUG
+        ),
+```
+
+### Hook
+
+Add `afterHit` hook that you can do somthing or log if redirect hit.
+
+```php
+        \Windwalker\DI\create(
+            RedirectMiddleware::class,
+            afterHit: raw(function (string $dest, \Redirect $redirect) {
+                \Windwalker\Core\Manager\Logger::info('Redirect to: ' . $dest);
+            })
+        ),
+```
+
+-----
+
 ## IP Allow/Block (Firewall)
 
 To enable IP Rules, add `FirewallMiddleware` to `front.route.php`
@@ -273,7 +303,7 @@ type can also supports string, array and enum. Use `NULL` to select all, `FALSE`
 
 ### Custom List
 
-`FirewallMiddleware` custom list must use 2 lists, `allowList` and `blockList`. 
+If you want to manually set ip list, `FirewallMiddleware` custom list must use 2 lists, `allowList` and `blockList`. 
 
 ```php
     ->middleware(
@@ -288,4 +318,28 @@ type can also supports string, array and enum. Use `NULL` to select all, `FALSE`
             '222.44.55.66',
         ],
     )
+```
+
+### Disable
+
+If you wanr to disable this middleware in debug mode, add this options:
+
+```php
+        \Windwalker\DI\create(
+            FirewallMiddleware::class,
+            disabled: WINDWALKER_DEBUG
+        ),
+```
+
+### Hook
+
+Add `afterHit` hook that you can do somthing or log if an IP was be blocked.
+
+```php
+        \Windwalker\DI\create(
+            FirewallMiddleware::class,
+            afterHit: raw(function (AppRequest $appRequest) {
+                \Windwalker\Core\Manager\Logger::info('Attack from: ' . $appRequest->getClientIp());
+            })
+        ),
 ```
