@@ -29,6 +29,8 @@ $mig->up(
                 $schema->tinyint('state')->length(1);
                 $schema->integer('ordering');
                 $schema->text('note');
+                $schema->integer('hits');
+                $schema->datetime('last_hit');
                 $schema->datetime('created');
                 $schema->datetime('modified');
                 $schema->integer('created_by');
