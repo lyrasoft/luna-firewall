@@ -1,5 +1,23 @@
 # LYRASOFT Firewall Package
 
+<!-- TOC -->
+* [LYRASOFT Firewall Package](#lyrasoft-firewall-package)
+  * [Installation](#installation)
+    * [Language Files](#language-files)
+  * [Register Admin Menu](#register-admin-menu)
+  * [Redirect](#redirect)
+    * [The Source Path Rules](#the-source-path-rules)
+    * [The Dest Path](#the-dest-path)
+    * [Other Params](#other-params)
+    * [Use Different Type from DB](#use-different-type-from-db)
+    * [Use Custom List](#use-custom-list)
+    * [Instant Redirect](#instant-redirect)
+  * [IP Allow/Block (Firewall)](#ip-allowblock-firewall)
+    * [Admin IP Rules Management](#admin-ip-rules-management)
+    * [Select DB Type](#select-db-type)
+    * [Custom List](#custom-list)
+<!-- TOC -->
+
 ## Installation
 
 Install from composer
