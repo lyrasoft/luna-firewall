@@ -1,0 +1,31 @@
+{
+    "name": "lyrasoft/firewall",
+    "description": "A Firewall package for LYRASOFT",
+    "type": "windwalker-package",
+    "require": {
+        "mlocati/ip-lib": "^1.18"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lyrasoft\\Firewall\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Simon Asika",
+            "email": "asika32764@gmail.com"
+        }
+    ],
+    "minimum-stability": "beta",
+    "extra": {
+        "windwalker":{
+            "packages": [
+                "Lyrasoft\\Firewall\\FirewallPackage"
+            ],
+            "modules": [
+                "src/Module"
+            ]
+        }
+    }
+}
