@@ -99,6 +99,10 @@ class FirewallService
      */
     public function getIpRules(string|\BackedEnum|array|null $type, int $ttl = 3600): Collection
     {
+        if (WINDWALKER_DEBUG || $ttl === 0) {
+            $this->getCachePool()->delete('ip-rule.' . json_encode($type));
+        }
+
         return $this->getCachePool()
             ->call(
                 'ip-rule.' . json_encode($type),

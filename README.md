@@ -373,3 +373,7 @@ The cache files is located at `caches/firewall/`, and you can add `firewall` to 
         ],
 ```
 
+### Cache Disable
+
+Cache will disable in debug mode or when `ttl` set to `0`.
+

@@ -177,6 +177,10 @@ class RedirectService
      */
     public function getAvailableRedirects(string|\BackedEnum|array|null $type, int $ttl = 3600): Collection
     {
+        if (WINDWALKER_DEBUG || $ttl === 0) {
+            $this->getCachePool()->delete('redirect.' . json_encode($type));
+        }
+
         return $this->getCachePool()
             ->call(
                 'redirect.' . json_encode($type),
