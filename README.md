@@ -20,6 +20,9 @@
     * [Custom List](#custom-list)
     * [Disable](#disable-1)
     * [Hook](#hook-1)
+  * [Cache](#cache)
+    * [Cache Lifetime](#cache-lifetime)
+    * [Cache Clear](#cache-clear)
 <!-- TOC -->
 
 ## Installation
@@ -231,7 +234,7 @@ If you wanr to disable this middleware in debug mode, add this options:
 ```php
         \Windwalker\DI\create(
             RedirectMiddleware::class,
-            disabled: WINDWALKER_DEBUG
+            enabled: !WINDWALKER_DEBUG
         ),
 ```
 
@@ -327,7 +330,7 @@ If you wanr to disable this middleware in debug mode, add this options:
 ```php
         \Windwalker\DI\create(
             FirewallMiddleware::class,
-            disabled: WINDWALKER_DEBUG
+            enabled: !WINDWALKER_DEBUG
         ),
 ```
 
