@@ -5,22 +5,20 @@ declare(strict_types=1);
 namespace Lyrasoft\Firewall\Service;
 
 use Lyrasoft\Firewall\Entity\Redirect;
+use Lyrasoft\Firewall\FirewallPackage;
 use Lyrasoft\Firewall\Repository\RedirectRepository;
 use Lyrasoft\Luna\Services\LocaleService;
 use Psr\Http\Message\ResponseInterface;
+use Windwalker\Cache\CachePool;
 use Windwalker\Core\Application\AppContext;
-use Windwalker\Core\Application\Context\AppRequestInterface;
 use Windwalker\Data\Collection;
 use Windwalker\DI\Attributes\Autowire;
 use Windwalker\DI\Attributes\Service;
-use Windwalker\Http\Response\RedirectResponse;
-use Windwalker\ORM\ORM;
 use Windwalker\Uri\UriHelper;
 use Windwalker\Utilities\Str;
 
 use function Windwalker\chronos;
 use function Windwalker\raw;
-use function Windwalker\response;
 
 #[Service]
 class RedirectService
@@ -177,10 +175,15 @@ class RedirectService
      *
      * @return  Collection<Redirect>
      */
-    public function getAvailableRedirects(string|\BackedEnum|array|null $type): Collection
+    public function getAvailableRedirects(string|\BackedEnum|array|null $type, int $ttl = 3600): Collection
     {
-        return $this->repository->getAvailableSelector($type)
-            ->all(Redirect::class);
+        return $this->getCachePool()
+            ->call(
+                'redirect.' . json_encode($type),
+                fn () => $this->repository->getAvailableSelector($type)
+                    ->all(Redirect::class),
+                $ttl
+            );
     }
 
     protected function parseWildcards(string $src): string
@@ -239,5 +242,10 @@ class RedirectService
         }
 
         return $route;
+    }
+
+    public function getCachePool(): CachePool
+    {
+        return FirewallPackage::getCachePool();
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lyrasoft\Firewall\Entity;
 
+use Lyrasoft\Firewall\FirewallPackage;
 use Lyrasoft\Luna\Attributes\Author;
 use Lyrasoft\Luna\Attributes\Modifier;
 use Unicorn\Attributes\NewOrdering;
@@ -22,6 +23,7 @@ use Windwalker\ORM\Attributes\Table;
 use Windwalker\ORM\Cast\JsonCast;
 use Windwalker\ORM\EntityInterface;
 use Windwalker\ORM\EntityTrait;
+use Windwalker\ORM\Event\AfterSaveEvent;
 use Windwalker\ORM\Metadata\EntityMetadata;
 
 #[Table('redirects', 'redirect')]
@@ -90,6 +92,12 @@ class Redirect implements EntityInterface
     public static function setup(EntityMetadata $metadata): void
     {
         //
+    }
+
+    #[AfterSaveEvent]
+    public static function afterSave(AfterSaveEvent $event)
+    {
+        FirewallPackage::getCachePool()->clear();
     }
 
     public function getId(): ?int

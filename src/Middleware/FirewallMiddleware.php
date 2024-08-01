@@ -28,6 +28,7 @@ class FirewallMiddleware implements MiddlewareInterface
         protected array $blockList = [],
         protected array $ignores = [],
         protected ?\Closure $afterHit = null,
+        protected int $cacheTtl = 3600,
     ) {
         //
     }
@@ -56,7 +57,7 @@ class FirewallMiddleware implements MiddlewareInterface
         $currentIP = $appRequest->getClientIP();
 
         if ($this->type !== false) {
-            [$allows, $blocks] = $this->firewallService->getAllowAndBlockList($this->type);
+            [$allows, $blocks] = $this->firewallService->getAllowAndBlockList($this->type, $this->cacheTtl);
 
             $this->allowList = array_merge($this->allowList, $allows);
             $this->blockList = array_merge($this->blockList, $blocks);

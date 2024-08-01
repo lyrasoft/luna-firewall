@@ -9,7 +9,9 @@ use IPLib\Factory as IPFactory;
 use IPLib\Range\RangeInterface;
 use Lyrasoft\Firewall\Entity\IpRule;
 use Lyrasoft\Firewall\Enum\IpRuleKind;
+use Lyrasoft\Firewall\FirewallPackage;
 use Lyrasoft\Firewall\Repository\IpRuleRepository;
+use Windwalker\Cache\CachePool;
 use Windwalker\Data\Collection;
 use Windwalker\DI\Attributes\Autowire;
 use Windwalker\DI\Attributes\Service;
@@ -95,15 +97,20 @@ class FirewallService
      *
      * @return  Collection<IpRule>
      */
-    public function getIpRules(string|\BackedEnum|array|null $type): Collection
+    public function getIpRules(string|\BackedEnum|array|null $type, int $ttl = 3600): Collection
     {
-        return $this->repository->getFrontListSelector($type)
-            ->all(IpRule::class);
+        return $this->getCachePool()
+            ->call(
+                'ip-rule.' . json_encode($type),
+                fn () => $this->repository->getFrontListSelector($type)
+                    ->all(IpRule::class),
+                $ttl
+            );
     }
 
-    public function getAllowAndBlockList(string|\BackedEnum|array|null $type): array
+    public function getAllowAndBlockList(string|\BackedEnum|array|null $type, int $ttl = 3600): array
     {
-        $rules = $this->getIpRules($type);
+        $rules = $this->getIpRules($type, $ttl);
 
         [$blocks, $allows] = $rules->partition(fn(IpRule $rule) => $rule->getKind() === IpRuleKind::BLOCK_LIST);
 
@@ -111,5 +118,10 @@ class FirewallService
         $allows = $allows->column('range')->dump();
 
         return [$allows, $blocks];
+    }
+
+    public function getCachePool(): CachePool
+    {
+        return FirewallPackage::getCachePool();
     }
 }

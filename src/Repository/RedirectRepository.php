@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lyrasoft\Firewall\Repository;
 
 use Lyrasoft\Firewall\Entity\Redirect;
+use Lyrasoft\Firewall\FirewallPackage;
 use Unicorn\Attributes\ConfigureAction;
 use Unicorn\Attributes\Repository;
 use Unicorn\Repository\Actions\BatchAction;
@@ -15,6 +16,7 @@ use Unicorn\Repository\ListRepositoryTrait;
 use Unicorn\Repository\ManageRepositoryInterface;
 use Unicorn\Repository\ManageRepositoryTrait;
 use Unicorn\Selector\ListSelector;
+use Windwalker\ORM\Event\AfterSaveEvent;
 use Windwalker\Query\Query;
 
 #[Repository(entityClass: Redirect::class)]

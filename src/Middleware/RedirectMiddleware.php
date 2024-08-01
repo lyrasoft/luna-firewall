@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace Lyrasoft\Firewall\Middleware;
 
 use Lyrasoft\Firewall\Entity\Redirect;
+use Lyrasoft\Firewall\FirewallPackage;
 use Lyrasoft\Firewall\Service\RedirectService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Windwalker\Cache\CachePool;
+use Windwalker\Cache\Serializer\PhpSerializer;
+use Windwalker\Cache\Storage\FileStorage;
 use Windwalker\Core\Application\AppContext;
 use Windwalker\Core\Http\AppRequest;
+use Windwalker\Core\Manager\CacheManager;
 use Windwalker\Data\Collection;
 
 use function Windwalker\collect;
@@ -27,6 +32,7 @@ class RedirectMiddleware implements MiddlewareInterface
         protected bool $instantRedirect = false,
         protected array $ignores = [],
         protected ?\Closure $afterHit = null,
+        protected int $cacheTtl = 3600,
     ) {
     }
 
@@ -52,7 +58,7 @@ class RedirectMiddleware implements MiddlewareInterface
         $redirects = collect();
 
         if ($this->type !== false) {
-            $redirects = $redirects->merge($this->redirectService->getAvailableRedirects($this->type));
+            $redirects = $redirects->merge($this->getAvailableRedirects());
         }
 
         if ($this->list !== null) {
@@ -143,5 +149,13 @@ class RedirectMiddleware implements MiddlewareInterface
                 Redirect::class => $redirect,
             ]
         );
+    }
+
+    /**
+     * @return  Collection
+     */
+    protected function getAvailableRedirects(): Collection
+    {
+        return $this->redirectService->getAvailableRedirects($this->type, $this->cacheTtl);
     }
 }

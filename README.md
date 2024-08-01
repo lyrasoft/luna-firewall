@@ -343,3 +343,30 @@ Add `afterHit` hook that you can do somthing or log if an IP was be blocked.
             })
         ),
 ```
+
+## Cache
+
+### Cache Lifetime
+
+Both middlewares has a `cacheTtl` param, default is `3600` seconds.
+
+```php
+        \Windwalker\DI\create(
+            FirewallMiddleware::class,
+            cacheTtl: 3600
+        ),
+```
+
+### Cache Clear
+
+Everytime you edit `Redirect` or `IpRule` will auto clear all caches.
+
+The cache files is located at `caches/firewall/`, and you can add `firewall` to clear cache command in `composer.json`
+
+```json
+        "post-autoload-dump": [
+            ...
+            "php windwalker cache:clear renderer html firewall" <-- Add firewall 
+        ],
+```
+

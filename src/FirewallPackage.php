@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Lyrasoft\Firewall;
 
+use Windwalker\Cache\CachePool;
+use Windwalker\Cache\Serializer\PhpSerializer;
+use Windwalker\Cache\Storage\FileStorage;
 use Windwalker\Core\Package\AbstractPackage;
 use Windwalker\Core\Package\PackageInstaller;
 use Windwalker\Utilities\StrNormalize;
@@ -61,5 +64,15 @@ class FirewallPackage extends AbstractPackage
                 ['modules', $name . '_model']
             );
         }
+    }
+
+    public static function getCachePool()
+    {
+        return new CachePool(
+            new FileStorage(
+                WINDWALKER_CACHE . '/firewall'
+            ),
+            new PhpSerializer(),
+        );
     }
 }
