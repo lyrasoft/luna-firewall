@@ -5,19 +5,14 @@ declare(strict_types=1);
 namespace Lyrasoft\Firewall\Middleware;
 
 use Lyrasoft\Firewall\Entity\Redirect;
-use Lyrasoft\Firewall\FirewallPackage;
 use Lyrasoft\Firewall\Service\RedirectService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Windwalker\Cache\CachePool;
-use Windwalker\Cache\Serializer\PhpSerializer;
-use Windwalker\Cache\Storage\FileStorage;
 use Windwalker\Core\Application\AppContext;
-use Windwalker\Core\Http\AppRequest;
-use Windwalker\Core\Manager\CacheManager;
 use Windwalker\Data\Collection;
+use Windwalker\Uri\Uri;
 
 use function Windwalker\collect;
 
@@ -45,7 +40,9 @@ class RedirectMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $route = $this->app->getSystemUri()->route();
+        $uri = clone $this->app->getSystemUri();
+        $uri = $uri->withPath(rtrim($this->app->getSystemUri()->route, '/'));
+        $route = trim($uri->toString(Uri::URI), '/');
 
         if ($this->ignores) {
             foreach ($this->ignores as $ignore) {
