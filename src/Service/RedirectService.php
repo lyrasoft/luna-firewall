@@ -185,7 +185,7 @@ class RedirectService
             ->call(
                 'redirect.' . json_encode($type),
                 fn () => $this->repository->getAvailableSelector($type)
-                    ->ordering('ordering', 'ASC')
+                    ->ordering('redirect.ordering', 'ASC')
                     ->all(Redirect::class),
                 $ttl
             );

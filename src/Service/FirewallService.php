@@ -107,7 +107,7 @@ class FirewallService
             ->call(
                 'ip-rule.' . json_encode($type),
                 fn () => $this->repository->getFrontListSelector($type)
-                    ->ordering('ordering', 'ASC')
+                    ->ordering('ip_rule.ordering', 'ASC')
                     ->all(IpRule::class),
                 $ttl
             );
