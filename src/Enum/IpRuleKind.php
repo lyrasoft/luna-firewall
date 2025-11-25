@@ -6,12 +6,12 @@ namespace Lyrasoft\Firewall\Enum;
 
 use Windwalker\Utilities\Attributes\Enum\Color;
 use Windwalker\Utilities\Contract\LanguageInterface;
-use Windwalker\Utilities\Enum\EnumTranslatableInterface;
-use Windwalker\Utilities\Enum\EnumTranslatableTrait;
+use Windwalker\Utilities\Enum\EnumRichInterface;
+use Windwalker\Utilities\Enum\EnumRichTrait;
 
-enum IpRuleKind: string implements EnumTranslatableInterface
+enum IpRuleKind: string implements EnumRichInterface
 {
-    use EnumTranslatableTrait;
+    use EnumRichTrait;
 
     #[Color('danger')]
     case BLOCK_LIST = 'block';

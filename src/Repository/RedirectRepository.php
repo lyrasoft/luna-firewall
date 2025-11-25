@@ -65,7 +65,7 @@ class RedirectRepository implements ManageRepositoryInterface, ListRepositoryInt
     {
         $action->setReorderGroupHandler(
             function (Query $query, Redirect $entity) {
-                $query->where('type', $entity->getType());
+                $query->where('type', $entity->type);
             }
         );
     }

@@ -75,7 +75,7 @@ class RedirectMiddleware implements MiddlewareInterface
 
             $this->runAfterHit($dest, $redirect);
 
-            return $this->app->redirect($dest, $redirect->getStatus(), $this->instantRedirect);
+            return $this->app->redirect($dest, $redirect->status, $this->instantRedirect);
         }
 
         try {
@@ -91,7 +91,7 @@ class RedirectMiddleware implements MiddlewareInterface
 
                     $this->runAfterHit($dest, $redirect);
 
-                    return $this->app->redirect($dest, $redirect->getStatus(), $this->instantRedirect);
+                    return $this->app->redirect($dest, $redirect->status, $this->instantRedirect);
                 }
             }
 
@@ -112,17 +112,14 @@ class RedirectMiddleware implements MiddlewareInterface
         foreach ($items as $key => $item) {
             if (is_string($item)) {
                 $r = new Redirect();
-                $r->setSrc($key);
-                $r->setDest($item);
-                $r->setStatus((int) $defaultStatus);
-                $r->setStatus(1);
-                $r->setParams(
-                    [
-                        'regex' => '1',
-                        'not_found_only' => '0',
-                        'handle_lang' => '0',
-                    ]
-                );
+                $r->src = $key;
+                $r->dest = $item;
+                $r->status = (int) $defaultStatus;
+                $r->params = [
+                    'regex' => '1',
+                    'not_found_only' => '0',
+                    'handle_lang' => '0',
+                ];
                 $items[$key] = $r;
             } elseif (!$item instanceof Redirect) {
                 throw new \RuntimeException('Wrong format of redirect rules.');

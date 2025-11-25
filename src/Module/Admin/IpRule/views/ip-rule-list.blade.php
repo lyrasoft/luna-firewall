@@ -110,7 +110,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
                     <tr>
                         {{-- Checkbox --}}
                         <td>
-                            <x-row-checkbox :row="$i" :id="$item->getId()"></x-row-checkbox>
+                            <x-row-checkbox :row="$i" :id="$item->id"></x-row-checkbox>
                         </td>
 
                         {{-- State --}}
@@ -119,22 +119,22 @@ $workflow = $app->service(BasicStateWorkflow::class);
                                 button-style="width: 100%"
                                 use-states
                                 :workflow="$workflow"
-                                :id="$item->getId()"
+                                :id="$item->id"
                                 :value="$item->state"
                             ></x-state-dropdown>
                         </td>
 
                         <td>
-                            <span class="text-{{ $item->getKind()->getColor() }}">
-                                {{ $item->getKind()->getTitle($lang) }}
+                            <span class="text-{{ $item->kind->getColor() }}">
+                                {{ $item->kind->getTitle($lang) }}
                             </span>
                         </td>
 
                         {{-- IP --}}
                         <td>
                             <div>
-                                <a href="{{ $nav->to('ip_rule_edit')->id($item->getId()) }}">
-                                    {{ $item->getRange() }}
+                                <a href="{{ $nav->to('ip_rule_edit')->id($item->id) }}">
+                                    {{ $item->range }}
                                 </a>
                             </div>
                         </td>
@@ -143,15 +143,15 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         <td class="text-end">
                             <x-order-control
                                 :enabled="$vm->reorderEnabled($ordering)"
-                                :id="$item->getId()"
-                                :value="$item->getOrdering()"
+                                :id="$item->id"
+                                :value="$item->ordering"
                             ></x-order-control>
                         </td>
 
                         {{-- Delete --}}
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-secondary"
-                                @click="grid.deleteItem('{{ $item->getId() }}')"
+                                @click="grid.deleteItem('{{ $item->id }}')"
                                 data-dos
                             >
                                 <i class="fa-solid fa-trash"></i>
@@ -160,7 +160,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
 
                         {{-- ID --}}
                         <td class="text-end">
-                            {{ $item->getId() }}
+                            {{ $item->id }}
                         </td>
                     </tr>
                 @empty

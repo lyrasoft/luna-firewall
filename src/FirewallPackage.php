@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Lyrasoft\Firewall;
 
+use Lyrasoft\Firewall\Entity\IpRule;
+use Lyrasoft\Firewall\Entity\Redirect;
 use Windwalker\Cache\CachePool;
 use Windwalker\Cache\Serializer\PhpSerializer;
 use Windwalker\Cache\Storage\FileStorage;
@@ -13,6 +15,9 @@ use Windwalker\Utilities\StrNormalize;
 
 class FirewallPackage extends AbstractPackage
 {
+    /**
+     * @throws \ReflectionException
+     */
     public function install(PackageInstaller $installer): void
     {
         $installer->installConfig(static::path('etc/*.php'), 'config');
@@ -20,8 +25,8 @@ class FirewallPackage extends AbstractPackage
         $installer->installMigrations(static::path('resources/migrations/**/*'), 'migrations');
         $installer->installRoutes(static::path('routes/**/*.php'), 'routes');
 
-        $this->installModules($installer, 'redirect', ['admin', 'model']);
-        $this->installModules($installer, 'ip_rule', ['admin', 'model']);
+        $installer->installMVCModules(Redirect::class, ['Admin'], true);
+        $installer->installMVCModules(IpRule::class, ['Admin'], true);
     }
 
     protected function installModules(

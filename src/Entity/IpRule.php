@@ -27,6 +27,8 @@ use Windwalker\ORM\EntityTrait;
 use Windwalker\ORM\Event\AfterSaveEvent;
 use Windwalker\ORM\Metadata\EntityMetadata;
 
+// phpcs:disable
+// todo: remove this when phpcs supports 8.4
 #[Table('ip_rules', 'ip_rule')]
 #[\AllowDynamicProperties]
 #[NewOrdering(NewOrdering::LAST)]
@@ -42,7 +44,9 @@ class IpRule implements EntityInterface
 
     #[Column('kind')]
     #[Cast(IpRuleKind::class)]
-    protected IpRuleKind $kind;
+    protected IpRuleKind $kind {
+        set(IpRuleKind|string $value) => $this->kind = IpRuleKind::wrap($value);
+    }
 
     #[Column('range')]
     protected string $range = '';
@@ -50,7 +54,9 @@ class IpRule implements EntityInterface
     #[Column('state')]
     #[Cast('int')]
     #[Cast(BasicState::class)]
-    protected BasicState $state;
+    protected BasicState $state {
+        set(BasicState|int $value) => $this->state = BasicState::wrap($value);
+    }
 
     #[Column('ordering')]
     protected int $ordering = 0;
@@ -61,12 +67,16 @@ class IpRule implements EntityInterface
     #[Column('created')]
     #[CastNullable(ServerTimeCast::class)]
     #[CreatedTime]
-    protected ?Chronos $created = null;
+    protected ?Chronos $created = null {
+        set(\DateTimeInterface|string|null $value) => $this->created = Chronos::tryWrap($value);
+    }
 
     #[Column('modified')]
     #[CastNullable(ServerTimeCast::class)]
     #[CurrentTime]
-    protected ?Chronos $modified = null;
+    protected ?Chronos $modified = null {
+        set(\DateTimeInterface|string|null $value) => $this->modified = Chronos::tryWrap($value);
+    }
 
     #[Column('created_by')]
     #[Author]
@@ -90,143 +100,5 @@ class IpRule implements EntityInterface
     public static function afterSave(AfterSaveEvent $event)
     {
         FirewallPackage::getCachePool()->clear();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(?int $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    public function getRange(): string
-    {
-        return $this->range;
-    }
-
-    public function setRange(string $range): static
-    {
-        $this->range = $range;
-
-        return $this;
-    }
-
-    public function getState(): BasicState
-    {
-        return $this->state;
-    }
-
-    public function setState(int|BasicState $state): static
-    {
-        $this->state = BasicState::wrap($state);
-
-        return $this;
-    }
-
-    public function getOrdering(): int
-    {
-        return $this->ordering;
-    }
-
-    public function setOrdering(int $ordering): static
-    {
-        $this->ordering = $ordering;
-
-        return $this;
-    }
-
-    public function getCreated(): ?Chronos
-    {
-        return $this->created;
-    }
-
-    public function setCreated(\DateTimeInterface|string|null $created): static
-    {
-        $this->created = Chronos::tryWrap($created);
-
-        return $this;
-    }
-
-    public function getModified(): ?Chronos
-    {
-        return $this->modified;
-    }
-
-    public function setModified(\DateTimeInterface|string|null $modified): static
-    {
-        $this->modified = Chronos::tryWrap($modified);
-
-        return $this;
-    }
-
-    public function getCreatedBy(): int
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(int $createdBy): static
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getModifiedBy(): int
-    {
-        return $this->modifiedBy;
-    }
-
-    public function setModifiedBy(int $modifiedBy): static
-    {
-        $this->modifiedBy = $modifiedBy;
-
-        return $this;
-    }
-
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    public function setParams(array $params): static
-    {
-        $this->params = $params;
-
-        return $this;
-    }
-    public function getKind(): IpRuleKind
-    {
-        return $this->kind;
-    }
-    public function setKind(string|IpRuleKind $kind): static
-    {
-        $this->kind = IpRuleKind::wrap($kind);
-        return $this;
-    }
-    public function getNote(): string
-    {
-        return $this->note;
-    }
-    public function setNote(string $note): static
-    {
-        $this->note = $note;
-        return $this;
     }
 }

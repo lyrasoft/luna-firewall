@@ -59,7 +59,7 @@ class IpRuleRepository implements ManageRepositoryInterface, ListRepositoryInter
     {
         $action->setReorderGroupHandler(
             function (Query $query, IpRule $entity) {
-                $query->where('type', $entity->getType());
+                $query->where('type', $entity->type);
             }
         );
     }

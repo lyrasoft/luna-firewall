@@ -53,7 +53,7 @@ class IpRuleEditView implements ViewModelInterface
         /** @var IpRule $item */
         $item = $this->repository->getItem($id);
 
-        if ($item && $item->getType() !== $type) {
+        if ($item && $item->type !== $type) {
             throw new RouteNotFoundException();
         }
 

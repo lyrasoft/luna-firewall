@@ -54,7 +54,7 @@ class RedirectService
         // Do not modify origin object
         $redirect = clone $redirect;
 
-        $src = rtrim($redirect->getSrc(), '/');
+        $src = rtrim($redirect->src, '/');
 
         // Handle lang
         $handleLang = $redirect->isHandleLang() && $this->localeService->isEnabled();
@@ -91,7 +91,7 @@ class RedirectService
         }
 
         if ($handleLang) {
-            $dest = $destRedirect->getDest();
+            $dest = $destRedirect->dest;
 
             if (str_contains($dest, '{lang}')) {
                 $dest = str_replace('{lang}', (string) $langAlias, $dest);
@@ -121,7 +121,7 @@ class RedirectService
             return null;
         }
 
-        $dest = $redirect->getDest();
+        $dest = $redirect->dest;
 
         if ($redirect->isRegexEnabled()) {
             $dest = $this->replaceVariables($dest, (array) $matches);
@@ -152,12 +152,12 @@ class RedirectService
 
         $this->updateHits($redirect);
 
-        return $this->app->redirect($dest, $redirect->getStatus(), $instant);
+        return $this->app->redirect($dest, $redirect->status, $instant);
     }
 
     public function updateHits(Redirect $redirect): void
     {
-        if (!$redirect->getId()) {
+        if (!$redirect->id) {
             return;
         }
 
@@ -166,7 +166,7 @@ class RedirectService
         $orm->update(Redirect::class)
             ->set('hits', raw('hits + 1'))
             ->set('last_hit', chronos())
-            ->where('id', $redirect->getId())
+            ->where('id', $redirect->id)
             ->execute();
     }
 
@@ -236,11 +236,11 @@ class RedirectService
         $langs = $this->localeService->getAvailableLanguages();
 
         foreach ($langs as $lang) {
-            if (str_starts_with($route, $lang->getAlias())) {
-                $route = Str::removeLeft($route, $lang->getAlias());
+            if (str_starts_with($route, $lang->alias)) {
+                $route = Str::removeLeft($route, $lang->alias);
                 $route = Str::removeLeft($route, '/') ?: '/';
 
-                $alias = $lang->getAlias();
+                $alias = $lang->alias;
 
                 return $route;
             }
