@@ -43,7 +43,8 @@ class EditForm
             ->defaultValue(IpRuleKind::BLOCK_LIST)
             ->required(true);
 
-        $kindField->getOptions()[0]->data('color-class', 'btn-danger');
+        // 會報錯，需確認如何修改後修改
+        //$kindField->getOptions()[0]->data('color-class', 'btn-danger');
 
         $form->add('range', TextField::class)
             ->label($this->trans('firewall.ip.rule.field.range'))
