@@ -36,67 +36,67 @@ class Redirect implements EntityInterface
     use EntityTrait;
 
     #[Column('id'), PK, AutoIncrement]
-    protected ?int $id = null;
+    public ?int $id = null;
 
     #[Column('type')]
-    protected string $type = '';
+    public string $type = '';
 
     #[Column('src')]
-    protected string $src = '';
+    public string $src = '';
 
     #[Column('dest')]
-    protected string $dest = '';
+    public string $dest = '';
 
     #[Column('status')]
-    protected int $status = 0;
+    public int $status = 0;
 
     #[Column('state')]
     #[Cast('int')]
     #[Cast(BasicState::class)]
-    protected BasicState $state {
+    public BasicState $state {
         set(BasicState|int $value) => $this->state = BasicState::wrap($value);
     }
 
     #[Column('ordering')]
-    protected int $ordering = 0;
+    public int $ordering = 0;
 
     #[Column('note')]
-    protected string $note = '';
+    public string $note = '';
 
     #[Column('hits')]
-    protected int $hits = 0;
+    public int $hits = 0;
 
     #[Column('last_hit')]
     #[CastNullable(ServerTimeCast::class)]
-    protected ?Chronos $lastHit = null {
+    public ?Chronos $lastHit = null {
         set(\DateTimeInterface|string|null $value) => $this->lastHit = Chronos::tryWrap($value);
     }
 
     #[Column('created')]
     #[CastNullable(ServerTimeCast::class)]
     #[CreatedTime]
-    protected ?Chronos $created = null {
+    public ?Chronos $created = null {
         set(\DateTimeInterface|string|null $value) => $this->created = Chronos::tryWrap($value);
     }
 
     #[Column('modified')]
     #[CastNullable(ServerTimeCast::class)]
     #[CurrentTime]
-    protected ?Chronos $modified = null {
+    public ?Chronos $modified = null {
         set(\DateTimeInterface|string|null $value) => $this->modified = Chronos::tryWrap($value);
     }
 
     #[Column('created_by')]
     #[Author]
-    protected int $createdBy = 0;
+    public int $createdBy = 0;
 
     #[Column('modified_by')]
     #[Modifier]
-    protected int $modifiedBy = 0;
+    public int $modifiedBy = 0;
 
     #[Column('params')]
     #[Cast(JsonCast::class)]
-    protected array $params = [];
+    public array $params = [];
 
     #[EntitySetup]
     public static function setup(EntityMetadata $metadata): void
