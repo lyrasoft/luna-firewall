@@ -117,7 +117,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
                     <tr>
                         {{-- Checkbox --}}
                         <td>
-                            <x-row-checkbox :row="$i" :id="$item->getId()"></x-row-checkbox>
+                            <x-row-checkbox :row="$i" :id="$item->id"></x-row-checkbox>
                         </td>
 
                         {{-- State --}}
@@ -126,7 +126,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
                                 button-style="width: 100%"
                                 use-states
                                 :workflow="$workflow"
-                                :id="$item->getId()"
+                                :id="$item->id"
                                 :value="$item->state"
                             ></x-state-dropdown>
                         </td>
@@ -135,13 +135,13 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         <td>
                             <div>
                                 <strong>From:</strong>
-                                <a href="{{ $nav->to('redirect_edit')->id($item->getId()) }}">
-                                    {{ $item->getSrc() }}
+                                <a href="{{ $nav->to('redirect_edit')->id($item->id) }}">
+                                    {{ $item->src }}
                                 </a>
                             </div>
                             <div class="text-muted small mt-1">
                                 <strong>To:</strong>
-                                <span>{{ $item->getDest() }}</span>
+                                <span>{{ $item->dest }}</span>
                             </div>
 
                             <div class=" mt-1">
@@ -170,22 +170,22 @@ $workflow = $app->service(BasicStateWorkflow::class);
 
                         {{-- Status --}}
                         <td>
-                            {{ $item->getStatus() }}
+                            {{ $item->status }}
                         </td>
 
                         {{-- Ordering --}}
                         <td class="text-end">
                             <x-order-control
                                 :enabled="$vm->reorderEnabled($ordering)"
-                                :id="$item->getId()"
-                                :value="$item->getOrdering()"
+                                :id="$item->id"
+                                :value="$item->ordering"
                             ></x-order-control>
                         </td>
 
                         {{-- Delete --}}
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-secondary"
-                                @click="grid.deleteItem('{{ $item->getId() }}')"
+                                @click="grid.deleteItem('{{ $item->id }}')"
                                 data-dos
                             >
                                 <i class="fa-solid fa-trash"></i>
@@ -194,7 +194,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
 
                         {{-- ID --}}
                         <td class="text-end">
-                            {{ $item->getId() }}
+                            {{ $item->id }}
                         </td>
                     </tr>
                 @empty

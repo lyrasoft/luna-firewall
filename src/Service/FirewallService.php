@@ -117,7 +117,7 @@ class FirewallService
     {
         $rules = $this->getIpRules($type, $ttl);
 
-        [$blocks, $allows] = $rules->partition(fn(IpRule $rule) => $rule->getKind() === IpRuleKind::BLOCK_LIST);
+        [$blocks, $allows] = $rules->partition(fn(IpRule $rule) => $rule->kind === IpRuleKind::BLOCK_LIST);
 
         $blocks = $blocks->column('range')->dump();
         $allows = $allows->column('range')->dump();

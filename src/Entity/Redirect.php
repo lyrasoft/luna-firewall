@@ -26,6 +26,8 @@ use Windwalker\ORM\EntityTrait;
 use Windwalker\ORM\Event\AfterSaveEvent;
 use Windwalker\ORM\Metadata\EntityMetadata;
 
+// phpcs:disable
+// todo: remove this when phpcs supports 8.4
 #[Table('redirects', 'redirect')]
 #[\AllowDynamicProperties]
 #[NewOrdering(NewOrdering::LAST)]
@@ -34,59 +36,67 @@ class Redirect implements EntityInterface
     use EntityTrait;
 
     #[Column('id'), PK, AutoIncrement]
-    protected ?int $id = null;
+    public ?int $id = null;
 
     #[Column('type')]
-    protected string $type = '';
+    public string $type = '';
 
     #[Column('src')]
-    protected string $src = '';
+    public string $src = '';
 
     #[Column('dest')]
-    protected string $dest = '';
+    public string $dest = '';
 
     #[Column('status')]
-    protected int $status = 0;
+    public int $status = 0;
 
     #[Column('state')]
     #[Cast('int')]
     #[Cast(BasicState::class)]
-    protected BasicState $state;
+    public BasicState $state {
+        set(BasicState|int $value) => $this->state = BasicState::wrap($value);
+    }
 
     #[Column('ordering')]
-    protected int $ordering = 0;
+    public int $ordering = 0;
 
     #[Column('note')]
-    protected string $note = '';
+    public string $note = '';
 
     #[Column('hits')]
-    protected int $hits = 0;
+    public int $hits = 0;
 
     #[Column('last_hit')]
     #[CastNullable(ServerTimeCast::class)]
-    protected ?Chronos $lastHit = null;
+    public ?Chronos $lastHit = null {
+        set(\DateTimeInterface|string|null $value) => $this->lastHit = Chronos::tryWrap($value);
+    }
 
     #[Column('created')]
     #[CastNullable(ServerTimeCast::class)]
     #[CreatedTime]
-    protected ?Chronos $created = null;
+    public ?Chronos $created = null {
+        set(\DateTimeInterface|string|null $value) => $this->created = Chronos::tryWrap($value);
+    }
 
     #[Column('modified')]
     #[CastNullable(ServerTimeCast::class)]
     #[CurrentTime]
-    protected ?Chronos $modified = null;
+    public ?Chronos $modified = null {
+        set(\DateTimeInterface|string|null $value) => $this->modified = Chronos::tryWrap($value);
+    }
 
     #[Column('created_by')]
     #[Author]
-    protected int $createdBy = 0;
+    public int $createdBy = 0;
 
     #[Column('modified_by')]
     #[Modifier]
-    protected int $modifiedBy = 0;
+    public int $modifiedBy = 0;
 
     #[Column('params')]
     #[Cast(JsonCast::class)]
-    protected array $params = [];
+    public array $params = [];
 
     #[EntitySetup]
     public static function setup(EntityMetadata $metadata): void
@@ -100,198 +110,18 @@ class Redirect implements EntityInterface
         FirewallPackage::getCachePool()->clear();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(?int $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    public function getSrc(): string
-    {
-        return $this->src;
-    }
-
-    public function setSrc(string $src): static
-    {
-        $this->src = $src;
-
-        return $this;
-    }
-
-    public function getDest(): string
-    {
-        return $this->dest;
-    }
-
-    public function setDest(string $dest): static
-    {
-        $this->dest = $dest;
-
-        return $this;
-    }
-
-    public function getStatus(): int
-    {
-        return $this->status;
-    }
-
-    public function setStatus(int $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getState(): BasicState
-    {
-        return $this->state;
-    }
-
-    public function setState(int|BasicState $state): static
-    {
-        $this->state = BasicState::wrap($state);
-
-        return $this;
-    }
-
-    public function getOrdering(): int
-    {
-        return $this->ordering;
-    }
-
-    public function setOrdering(int $ordering): static
-    {
-        $this->ordering = $ordering;
-
-        return $this;
-    }
-
-    public function getCreated(): ?Chronos
-    {
-        return $this->created;
-    }
-
-    public function setCreated(\DateTimeInterface|string|null $created): static
-    {
-        $this->created = Chronos::tryWrap($created);
-
-        return $this;
-    }
-
-    public function getModified(): ?Chronos
-    {
-        return $this->modified;
-    }
-
-    public function setModified(\DateTimeInterface|string|null $modified): static
-    {
-        $this->modified = Chronos::tryWrap($modified);
-
-        return $this;
-    }
-
-    public function getCreatedBy(): int
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(int $createdBy): static
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getModifiedBy(): int
-    {
-        return $this->modifiedBy;
-    }
-
-    public function setModifiedBy(int $modifiedBy): static
-    {
-        $this->modifiedBy = $modifiedBy;
-
-        return $this;
-    }
-
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    public function setParams(array $params): static
-    {
-        $this->params = $params;
-
-        return $this;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
     public function isRegexEnabled(): bool
     {
-        return (bool) ($this->getParams()['regex'] ?? false);
+        return (bool) ($this->params['regex'] ?? false);
     }
 
     public function isNotFoundOnly(): bool
     {
-        return (bool) ($this->getParams()['not_found_only'] ?? false);
+        return (bool) ($this->params['not_found_only'] ?? false);
     }
 
     public function isHandleLang(): bool
     {
-        return (bool) ($this->getParams()['handle_lang'] ?? false);
-    }
-
-    public function getNote(): string
-    {
-        return $this->note;
-    }
-
-    public function setNote(string $note): static
-    {
-        $this->note = $note;
-
-        return $this;
-    }
-
-    public function getHits(): int
-    {
-        return $this->hits;
-    }
-
-    public function setHits(int $hits): static
-    {
-        $this->hits = $hits;
-
-        return $this;
-    }
-
-    public function getLastHit(): ?Chronos
-    {
-        return $this->lastHit;
-    }
-
-    public function setLastHit(\DateTimeInterface|string|null $lastHit): static
-    {
-        $this->lastHit = Chronos::tryWrap($lastHit);
-
-        return $this;
+        return (bool) ($this->params['handle_lang'] ?? false);
     }
 }

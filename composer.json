@@ -3,6 +3,8 @@
     "description": "A Firewall package for LYRASOFT",
     "type": "windwalker-package",
     "require": {
+        "php": ">=8.4.6",
+        "lyrasoft/luna": "^2.2",
         "mlocati/ip-lib": "^1.18"
     },
     "license": "MIT",
