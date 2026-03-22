@@ -56,6 +56,11 @@ class EditForm
                 )
             );
 
+        $form->add('paths', TextareaField::class)
+            ->label($this->trans('firewall.ip.rule.field.paths'))
+            ->rows(7)
+            ->help($this->trans('firewall.ip.rule.field.paths.help'));
+
         $form->add('note', TextareaField::class)
             ->label($this->trans('firewall.ip.rule.field.note'))
             ->rows(7);
@@ -71,6 +76,9 @@ class EditForm
             ->circle(true)
             ->color('success')
             ->defaultValue('1');
+
+        $form->add('expired_at', CalendarField::class)
+            ->label($this->trans('firewall.ip.rule.field.expired.at'));
 
         $form->add('created', CalendarField::class)
             ->label($this->trans('unicorn.field.created'))

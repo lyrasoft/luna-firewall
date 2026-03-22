@@ -26,6 +26,9 @@ use Windwalker\ORM\EntityInterface;
 use Windwalker\ORM\EntityTrait;
 use Windwalker\ORM\Event\AfterSaveEvent;
 use Windwalker\ORM\Metadata\EntityMetadata;
+use Windwalker\Utilities\Arr;
+
+use function Windwalker\unwrap_enum;
 
 // phpcs:disable
 // todo: remove this when phpcs supports 8.4
@@ -40,7 +43,9 @@ class IpRule implements EntityInterface
     public ?int $id = null;
 
     #[Column('type')]
-    public string $type = '';
+    public string $type = '' {
+        set(string|\UnitEnum $value) => $this->type = unwrap_enum($value);
+    }
 
     #[Column('kind')]
     #[Cast(IpRuleKind::class)]
@@ -50,6 +55,9 @@ class IpRule implements EntityInterface
 
     #[Column('range')]
     public string $range = '';
+
+    #[Column('paths')]
+    public string $path = '';
 
     #[Column('state')]
     #[Cast('int')]
@@ -63,6 +71,12 @@ class IpRule implements EntityInterface
 
     #[Column('note')]
     public string $note = '';
+
+    #[Column('expired_at')]
+    #[CastNullable(ServerTimeCast::class)]
+    public ?Chronos $expiredAt = null {
+        set(\DateTimeInterface|string|null $value) => $this->expiredAt = Chronos::tryWrap($value);
+    }
 
     #[Column('created')]
     #[CastNullable(ServerTimeCast::class)]
@@ -100,5 +114,14 @@ class IpRule implements EntityInterface
     public static function afterSave(AfterSaveEvent $event)
     {
         FirewallPackage::getCachePool()->clear();
+    }
+
+    public function getPathList(): ?array
+    {
+        if ($this->path === '') {
+            return null;
+        }
+
+        return Arr::explodeAndClear("\n", $this->path);
     }
 }

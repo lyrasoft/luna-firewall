@@ -46,9 +46,11 @@ return new /** 2024073104460001_FirewallInit */ class extends AbstractMigration 
                 $schema->varchar('type');
                 $schema->varchar('kind');
                 $schema->varchar('range');
+                $schema->text('paths');
                 $schema->tinyint('state')->length(1);
                 $schema->integer('ordering');
                 $schema->text('note');
+                $schema->datetime('expired_at');
                 $schema->datetime('created');
                 $schema->datetime('modified');
                 $schema->integer('created_by');
@@ -57,6 +59,7 @@ return new /** 2024073104460001_FirewallInit */ class extends AbstractMigration 
 
                 $schema->addIndex('type');
                 $schema->addIndex('ordering');
+                $schema->addIndex('expired_at');
             }
         );
     }

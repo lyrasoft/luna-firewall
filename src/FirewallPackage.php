@@ -29,7 +29,7 @@ class FirewallPackage extends AbstractPackage
         $installer->installMVCModules(IpRule::class, ['Admin'], true);
     }
 
-    public static function getCachePool()
+    public static function getCachePool(): CachePool
     {
         return new CachePool(
             new FileStorage(

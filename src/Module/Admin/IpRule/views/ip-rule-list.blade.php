@@ -87,8 +87,8 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         </x-sort>
                     </th>
 
-                    <th>
-                        @lang('firewall.ip.rule.field.note')
+                    <th style="width: 3%" class="text-nowrap">
+                        @lang('firewall.ip.rule.field.expired.at')
                     </th>
 
                     {{-- ORDERING --}}
@@ -127,6 +127,7 @@ $workflow = $app->service(BasicStateWorkflow::class);
                             <x-state-dropdown color-on="text"
                                 button-style="width: 100%"
                                 use-states
+                                only-icon
                                 :workflow="$workflow"
                                 :id="$item->id"
                                 :value="$item->state"
@@ -155,10 +156,16 @@ $workflow = $app->service(BasicStateWorkflow::class);
                                     </span>
                                 @endforeach
                             </div>
+
+                            @if ($item->note)
+                                <div class="mt-1 small text-muted">
+                                    {{ $item->note }}
+                                </div>
+                            @endif
                         </td>
 
-                        <td>
-                            {{ $item->note }}
+                        <td class="text-nowrap">
+                            {{ $chronos->toLocalFormat($item->expiredAt, 'Y-m-d H:i:s') }}
                         </td>
 
                         {{-- Ordering --}}

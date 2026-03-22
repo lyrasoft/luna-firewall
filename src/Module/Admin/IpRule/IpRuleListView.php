@@ -10,6 +10,7 @@ use Lyrasoft\Firewall\Repository\IpRuleRepository;
 use Unicorn\View\FormAwareViewModelTrait;
 use Unicorn\View\ORMAwareViewModelTrait;
 use Windwalker\Core\Application\AppContext;
+use Windwalker\Core\Attributes\Request\Input;
 use Windwalker\Core\Attributes\ViewMetadata;
 use Windwalker\Core\Attributes\ViewModel;
 use Windwalker\Core\Html\HtmlFrame;
@@ -53,6 +54,8 @@ class IpRuleListView implements ViewModelInterface, FilterAwareViewModelInterfac
      */
     public function prepare(AppContext $app, View $view): array
     {
+        $type = $app->input('type');
+
         $state = $this->repository->getState();
 
         // Prepare Items
@@ -68,6 +71,7 @@ class IpRuleListView implements ViewModelInterface, FilterAwareViewModelInterfac
                 $search['*'] ?? '',
                 $this->getSearchFields()
             )
+            ->where('ip_rule.type', $type)
             ->ordering($ordering)
             ->page($page)
             ->limit($limit)
@@ -81,7 +85,7 @@ class IpRuleListView implements ViewModelInterface, FilterAwareViewModelInterfac
 
         $showFilters = $this->isFiltered($filter);
 
-        return compact('items', 'pagination', 'form', 'showFilters', 'ordering');
+        return compact('items', 'pagination', 'form', 'showFilters', 'ordering', 'type');
     }
 
     public function reorderEnabled(string $ordering): bool
@@ -109,15 +113,19 @@ class IpRuleListView implements ViewModelInterface, FilterAwareViewModelInterfac
         return [
             'ip_rule.id',
             'ip_rule.range',
+            'ip_rule.paths',
             'ip_rule.note',
         ];
     }
 
     #[ViewMetadata]
-    protected function prepareMetadata(HtmlFrame $htmlFrame): void
+    protected function prepareMetadata(HtmlFrame $htmlFrame, #[Input] string $type): void
     {
         $htmlFrame->setTitle(
-            $this->trans('unicorn.title.grid', title: $this->trans('firewall.ip.rule.title'))
+            $this->trans(
+                'unicorn.title.grid',
+                title: $this->trans('firewall.ip.rule.title')
+            ) . '(' . $type . ')',
         );
     }
 }
