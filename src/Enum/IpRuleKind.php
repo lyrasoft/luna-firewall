@@ -6,21 +6,28 @@ namespace Lyrasoft\Firewall\Enum;
 
 use Windwalker\Utilities\Attributes\Enum\Color;
 use Windwalker\Utilities\Contract\LanguageInterface;
+use Windwalker\Utilities\Enum\EnumRichInterface;
+use Windwalker\Utilities\Enum\EnumRichTrait;
 use Windwalker\Utilities\Enum\EnumTranslatableInterface;
 use Windwalker\Utilities\Enum\EnumTranslatableTrait;
 
-enum IpRuleKind: string implements EnumTranslatableInterface
+enum IpRuleKind: string implements EnumRichInterface
 {
-    use EnumTranslatableTrait;
+    use EnumRichTrait;
 
     #[Color('danger')]
-    case BLOCK_LIST = 'block';
+    case BLOCK = 'block';
 
     #[Color('success')]
-    case ALLOW_LIST = 'allow';
+    case ALLOW = 'allow';
 
-    public function trans(LanguageInterface $lang, ...$args): string
+    public function translateKey(string $name): string
     {
-        return $lang->trans('firewall.ip.rule.kind.' . $this->getKey());
+        return 'firewall.ip.rule.kind.' . $name;
+    }
+
+    public function isAllow(): bool
+    {
+        return $this === self::ALLOW;
     }
 }

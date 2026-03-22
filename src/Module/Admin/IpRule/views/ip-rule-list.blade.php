@@ -68,11 +68,16 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         </x-sort>
                     </th>
 
-                    {{-- King --}}
+                    {{-- Kind --}}
                     <th class="text-nowrap" style="width: 3%">
                         <x-sort field="ip_rule.kind">
                             @lang('firewall.ip.rule.field.kind')
                         </x-sort>
+                    </th>
+
+                    {{-- Edit --}}
+                    <th class="text-nowrap text-center" style="width: 3%">
+                        @lang('firewall.ip.rule.field.edit')
                     </th>
 
                     {{-- IP --}}
@@ -80,6 +85,10 @@ $workflow = $app->service(BasicStateWorkflow::class);
                         <x-sort field="ip_rule.ip_range">
                             @lang('firewall.ip.rule.field.range')
                         </x-sort>
+                    </th>
+
+                    <th>
+                        @lang('firewall.ip.rule.field.note')
                     </th>
 
                     {{-- ORDERING --}}
@@ -130,13 +139,26 @@ $workflow = $app->service(BasicStateWorkflow::class);
                             </span>
                         </td>
 
+                        <td class="text-center">
+                            <a href="{{ $nav->to('ip_rule_edit')->id($item->id) }}"
+                                class="btn btn-sm btn-primary">
+                                <i class="far fa-edit"></i>
+                            </a>
+                        </td>
+
                         {{-- IP --}}
                         <td>
                             <div>
-                                <a href="{{ $nav->to('ip_rule_edit')->id($item->id) }}">
-                                    {{ $item->range }}
-                                </a>
+                                @foreach (explode(',', $item->range) as $ipRange)
+                                    <span class="badge bg-secondary">
+                                        {{ $ipRange }}
+                                    </span>
+                                @endforeach
                             </div>
+                        </td>
+
+                        <td>
+                            {{ $item->note }}
                         </td>
 
                         {{-- Ordering --}}

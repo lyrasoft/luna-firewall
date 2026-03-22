@@ -40,7 +40,7 @@ class EditForm
         $kindField = $form->add('kind', ButtonRadioField::class)
             ->label($this->trans('firewall.ip.rule.field.kind'))
             ->registerFromEnums(IpRuleKind::class, $this->lang)
-            ->defaultValue(IpRuleKind::BLOCK_LIST)
+            ->defaultValue(IpRuleKind::BLOCK)
             ->required(true);
 
         $kindField->getOptions()[0]->dataset->colorClass = 'btn-danger';
@@ -51,7 +51,8 @@ class EditForm
             ->help(
                 $this->trans(
                     'firewall.ip.rule.field.range.help',
-                    link: 'https://github.com/lyrasoft/luna-firewall'
+                    link: env('IP_RULE_RANGE_HELP_LINK')
+                        ?: 'https://lyrasoft.atlassian.net/wiki/spaces/DevKnowledgeOutside/pages/2379579402/'
                 )
             );
 

@@ -30,7 +30,7 @@ class IpRuleController
 
         $controller->prepareSave(
             function (PrepareSaveEvent $event) use ($app) {
-                $data = &$event->getData();
+                $data = &$event->data;
 
                 $data['type'] = $app->input('type');
             }
@@ -38,14 +38,19 @@ class IpRuleController
 
         $controller->beforeSave(
             function (BeforeSaveEvent $event) use ($app) {
-                $data = &$event->getData();
+                $data = &$event->data;
 
-                $range = FirewallService::createRangeInstance($data['range']);
+                $range = $data['range'];
+                $rages = explode(',', $range);
 
-                if (!$range) {
-                    throw new ValidateFailException(
-                        '不允許的 IP 格式'
-                    );
+                foreach ($rages as $rage) {
+                    $range = FirewallService::createRangeInstance(trim($rage));
+
+                    if (!$range) {
+                        throw new ValidateFailException(
+                            '不允許的 IP 格式'
+                        );
+                    }
                 }
             }
         );

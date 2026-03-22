@@ -25,33 +25,36 @@ class FirewallService
     ) {
     }
 
-    public function isAllow(string $ip, ?array $allowList = null, ?array $blockList = null): bool
+    /**
+     * @param  string            $ip
+     * @param  iterable<IpRule>  $ipRules
+     * @param  bool              $default
+     *
+     * @return  bool
+     */
+    public function isAllow(string $ip, iterable $ipRules, bool $default = false): bool
     {
-        if (empty($blockList) && empty($allowList)) {
-            return true;
-        }
-
         $address = IPFactory::parseAddressString($ip);
 
         if ($address === null) {
             return false;
         }
 
-        if (empty($blockList)) {
-            return $this->matchAddress($address, $allowList);
+        /** @var IpRule $ipRule */
+        foreach ($ipRules as $ipRule) {
+            $ranges = static::createRangeInstances($ipRule->range);
+
+            if (array_any($ranges, static fn($range) => $range->contains($address))) {
+                return $ipRule->kind->isAllow();
+            }
         }
 
-        if (empty($allowList)) {
-            return !$this->matchAddress($address, $blockList);
-        }
-
-        return $this->matchAddress($address, $allowList) &&
-            !$this->matchAddress($address, $blockList);
+        return $default;
     }
 
-    public function matchAddress(AddressInterface $address, array $list): bool
+    public function matchAddress(AddressInterface $address, array $ipList = []): bool
     {
-        foreach ($this->convertListToRangeArray($list) as $ipRange) {
+        foreach ($this->convertListToRangeArray($ipList) as $ipRange) {
             if ($ipRange === null) {
                 continue;
             }
@@ -78,6 +81,26 @@ class FirewallService
         return array_map(
             static::createRangeInstance(...),
             $list
+        );
+    }
+
+    /**
+     * @param  string|array  $ranges
+     *
+     * @return  array<RangeInterface>
+     */
+    public static function createRangeInstances(string|array $ranges): array
+    {
+        if (is_string($ranges)) {
+            $ranges = explode(',', $ranges);
+            $ranges = array_map('trim', $ranges);
+        }
+
+        return array_filter(
+            array_map(
+                static::createRangeInstance(...),
+                $ranges
+            )
         );
     }
 
@@ -111,18 +134,6 @@ class FirewallService
                     ->all(IpRule::class),
                 $ttl
             );
-    }
-
-    public function getAllowAndBlockList(string|\BackedEnum|array|null $type, int $ttl = 3600): array
-    {
-        $rules = $this->getIpRules($type, $ttl);
-
-        [$blocks, $allows] = $rules->partition(fn(IpRule $rule) => $rule->kind === IpRuleKind::BLOCK_LIST);
-
-        $blocks = $blocks->column('range')->dump();
-        $allows = $allows->column('range')->dump();
-
-        return [$allows, $blocks];
     }
 
     public function getCachePool(): CachePool
