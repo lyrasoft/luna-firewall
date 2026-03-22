@@ -84,7 +84,7 @@ use Lyrasoft\Firewall\Middleware\RedirectMiddleware;
     'middlewares' => [
         \Windwalker\DI\create(
             RedirectMiddleware::class,
-            ignores: [
+            excludes: [
                 'admin/*'
             ]
         ),
@@ -129,7 +129,7 @@ And if you want to choose types for middleware, you can do this:
         \Windwalker\DI\create(
             RedirectMiddleware::class,
             type: 'other_type',
-            ignores: [
+            excludes: [
                 'admin/*'
             ]
         ),
@@ -157,7 +157,7 @@ This settings will merge DB list and custom list.
                 'foo/bar' => 'hello/world',            
                 'foo/yoo/*' => 'hello/mountain/$1',            
             ],
-            ignores: [
+            excludes: [
                 'admin/*'
             ]
         ),
@@ -179,7 +179,7 @@ This settings will disable DB list and only use custom list.
                 'foo/bar' => 'hello/world',            
                 'foo/yoo/*' => 'hello/mountain/$1',            
             ],
-            ignores: [
+            excludes: [
                 'admin/*'
             ]
         ),
@@ -264,6 +264,9 @@ use Lyrasoft\Firewall\Middleware\FirewallMiddleware;
 
     ->middleware(
         FirewallMiddleware::class,
+        // ...
+        defaultAction: \Lyrasoft\Firewall\Enum\IpRuleKind::ALLOW, // Or BLOCK, default is ALLOW
+        logger: 'firewall/blocks' // Or LoggerInterface instance, default is NULL
     )
 
     // ...
@@ -298,7 +301,7 @@ And set type name to middleware
 ```php
     ->middleware(
         FirewallMiddleware::class,
-        type: 'foo'
+        type: 'foo',
     )
 ```
 
@@ -320,6 +323,7 @@ If you want to manually set ip list, `FirewallMiddleware` custom list must use 2
             '165.2.90.45',
             '222.44.55.66',
         ],
+        allowAsFirst: true, // Or false, default is false
     )
 ```
 
@@ -341,9 +345,9 @@ Add `afterHit` hook that you can do somthing or log if an IP was be blocked.
 ```php
         \Windwalker\DI\create(
             FirewallMiddleware::class,
-            afterHit: raw(function (AppRequest $appRequest) {
+            afterHit: fn () => function (AppRequest $appRequest) {
                 \Windwalker\Core\Manager\Logger::info('Attack from: ' . $appRequest->getClientIp());
-            })
+            }
         ),
 ```
 
@@ -356,7 +360,8 @@ Both middlewares has a `cacheTtl` param, default is `3600` seconds.
 ```php
         \Windwalker\DI\create(
             FirewallMiddleware::class,
-            cacheTtl: 3600
+            cacheTtl: 3600,
+            clearExpiredChance: 1 / 100 // Default is 1/100, means every 100 request will clear expired cache once, set it to 0 to disable auto clear expired cache
         ),
 ```
 
