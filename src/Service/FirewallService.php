@@ -17,11 +17,11 @@ use Windwalker\Data\Collection;
 use Windwalker\DI\Attributes\Autowire;
 use Windwalker\DI\Attributes\Service;
 use Windwalker\ORM\ORM;
+use Windwalker\Query\Query;
 use Windwalker\Uri\UriNormalizer;
 
-use Windwalker\Utilities\Arr;
-
 use function Windwalker\chronos;
+use function Windwalker\try_chronos;
 
 #[Service]
 class FirewallService
@@ -116,16 +116,17 @@ class FirewallService
         return false;
     }
 
-    public function blockIP(string|\UnitEnum $type, string $ip, \DateTimeInterface|string $expires = '1hour'): IpRule
+    public function blockIP(string|\UnitEnum $type, string $ip, \DateTimeInterface|string|null $expires = null): IpRule
     {
-        $exists = $this->orm->findOne(
-            IpRule::class,
-            [
-                'type' => $type,
-                'kind' => IpRuleKind::BLOCK,
-                'range' => $ip,
-            ]
-        );
+        $exists = $this->orm->from(IpRule::class)
+            ->where('type', $type)
+            ->where('kind', IpRuleKind::BLOCK)
+            ->where('range', $ip)
+            ->tapIf(
+                $expires,
+                fn(Query $query) => $query->where('expired_at', '>=', chronos())
+            )
+            ->get(IpRule::class);
 
         if ($exists) {
             return $exists;
@@ -137,7 +138,7 @@ class FirewallService
         $item->range = $ip;
         $item->state = 1;
         $item->ordering = 0;
-        $item->expiredAt = chronos($expires);
+        $item->expiredAt = try_chronos($expires);
 
         $this->orm->createOne($item);
 
@@ -206,7 +207,7 @@ class FirewallService
         return $this->getCachePool()
             ->call(
                 'ip-rule.' . json_encode($type),
-                fn () => $this->repository->getFrontListSelector($type)
+                fn() => $this->repository->getFrontListSelector($type)
                     ->ordering('ip_rule.ordering', 'ASC')
                     ->all(IpRule::class),
                 $ttl
@@ -221,6 +222,7 @@ class FirewallService
     public function clearExpired(): void
     {
         $this->orm->delete(IpRule::class)
+            ->where('expired_at', '!=', null)
             ->where('expired_at', '<', chronos())
             ->execute();
     }

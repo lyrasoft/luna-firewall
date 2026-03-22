@@ -17,10 +17,10 @@ class Honeypot
     {
     }
 
-    public function link(mixed $route = null, string $paramName = '_ref'): HTMLElement
+    public function link(mixed $url = null, string $paramName = '_ref'): HTMLElement
     {
         $el = HTMLElement::new('a');
-        $el->setAttribute('href', (string) ($route ?? $this->route($paramName)));
+        $el->setAttribute('href', (string) ($url ?? $this->route(paramName: $paramName)));
         $el->setAttribute('rel', 'nofollow');
         $el->style->height = '0';
         $el->style->position = 'absolute';
