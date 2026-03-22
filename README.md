@@ -16,13 +16,16 @@
     * [Hook](#hook)
   * [IP Allow/Block (Firewall)](#ip-allowblock-firewall)
     * [Admin IP Rules Management](#admin-ip-rules-management)
+    * [Paths and Domains](#paths-and-domains)
     * [Select DB Type](#select-db-type)
     * [Custom List](#custom-list)
     * [Disable](#disable-1)
     * [Hook](#hook-1)
+    * [FirewallMiddleware params](#firewallmiddleware-params)
   * [Cache](#cache)
     * [Cache Lifetime](#cache-lifetime)
     * [Cache Clear](#cache-clear)
+    * [Cache Disable](#cache-disable)
 <!-- TOC -->
 
 ## Installation
@@ -109,12 +112,14 @@ Now you can add redirect records at admin:
 
 Thr dest path can be relative path: `foo/bar` or full URL: `https://simular.co/foo/bar`.
 
-If you enabne the `Regex`, you may use variables start with `$` to insert matched string. For example, a `foo/*/edit/(\d+)`, can redirect to `new/path/$1/edit/$2`
+If you enabne the `Regex`, you may use variables start with `$` to insert matched string. For example, a
+`foo/*/edit/(\d+)`, can redirect to `new/path/$1/edit/$2`
 
 ### Other Params
 
 - `Only 404`: Only redirect if a page is 404, if page URL exists, won't redirect.
-- `Handle Locale`: If this site is multi-language, this params will auto auto detect the starting ;anguage prefix and auto add it to dest path, you may use `{lang}` in dest path to custom set lang alias position.
+- `Handle Locale`: If this site is multi-language, this params will auto auto detect the starting ;anguage prefix and
+  auto add it to dest path, you may use `{lang}` in dest path to custom set lang alias position.
 
 ### Use Different Type from DB
 
@@ -138,7 +143,8 @@ And if you want to choose types for middleware, you can do this:
     ],
 ```
 
-The type supports `string|Enum|array|null|false`, if you send `NULL` into it, means all redirect records. If you send `FALSE`, means don't use DB recods.
+The type supports `string|Enum|array|null|false`, if you send `NULL` into it, means all redirect records. If you send
+`FALSE`, means don't use DB recods.
 
 ### Use Custom List
 
@@ -280,17 +286,32 @@ Select Allow or Block, and enter the IP Range format:
 
 The supported formats:
 
-Type | Syntax | Details
---- | --- | ---
-IPV6|`::1`|Short notation
-IPV4|`192.168.0.1`|
-Range|`192.168.0.0-192.168.1.60`|Includes all IPs from *192.168.0.0* to *192.168.0.255*<br />and from *192.168.1.0* to *198.168.1.60*
-Wild card|`192.168.0.*`|IPs starting with *192.168.0*<br />Same as IP Range `192.168.0.0-192.168.0.255`
-Subnet mask|`192.168.0.0/255.255.255.0`|IPs starting with *192.168.0*<br />Same as `192.168.0.0-192.168.0.255` and `192.168.0.*`
-CIDR Mask|`192.168.0.0/24`|IPs starting with *192.168.0*<br />Same as `192.168.0.0-192.168.0.255` and `192.168.0.*`<br />and `192.168.0.0/255.255.255.0`
+| Type        | Syntax                      | Details                                                                                                                       |
+|-------------|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| IPV6        | `::1`                       | Short notation                                                                                                                |
+| IPV4        | `192.168.0.1`               |                                                                                                                               |
+| Range       | `192.168.0.0-192.168.1.60`  | Includes all IPs from *192.168.0.0* to *192.168.0.255*<br />and from *192.168.1.0* to *198.168.1.60*                          |
+| Wild card   | `192.168.0.*`               | IPs starting with *192.168.0*<br />Same as IP Range `192.168.0.0-192.168.0.255`                                               |
+| Subnet mask | `192.168.0.0/255.255.255.0` | IPs starting with *192.168.0*<br />Same as `192.168.0.0-192.168.0.255` and `192.168.0.*`                                      |
+| CIDR Mask   | `192.168.0.0/24`            | IPs starting with *192.168.0*<br />Same as `192.168.0.0-192.168.0.255` and `192.168.0.*`<br />and `192.168.0.0/255.255.255.0` |
+
+And you can use `,` to separate multiple IPs or IP Ranges. For example, `0.0.0.0/0,::/0` means all IPs includes both
+IPV4 and IPV6.
 
 We use [mlocati/ip-lib](https://github.com/mlocati/ip-lib) as IP Range parser.
 
+### Paths and Domains
+
+After `0.2.0` there has a paths textarea, you can set domains / URLs or paths that this rule will effect, 1 line for
+1 path.
+
+![Image](https://github.com/user-attachments/assets/b682b032-8847-4e04-9933-f60867414282)
+
+For example, if you only want to block some IPs to access admin panel, you can set paths to `/admin/*`,
+or `/admin/login` if you only want to block access to login page.
+
+You can also set domains or full URLs, for example, you can block some IPs to
+access `https://*.foo.com/bar`, or `https://foo.com/bar/*/baz`.
 
 ### Select DB Type
 
@@ -309,7 +330,7 @@ type can also supports string, array and enum. Use `NULL` to select all, `FALSE`
 
 ### Custom List
 
-If you want to manually set ip list, `FirewallMiddleware` custom list must use 2 lists, `allowList` and `blockList`. 
+If you want to manually set ip list, `FirewallMiddleware` custom list must use 2 lists, `allowList` and `blockList`.
 
 ```php
     ->middleware(
@@ -351,6 +372,22 @@ Add `afterHit` hook that you can do somthing or log if an IP was be blocked.
         ),
 ```
 
+### FirewallMiddleware params
+
+| Param                | Type                | Default                  | Description                                                                                                         |
+|----------------------|---------------------|--------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `enabled`            | `bool`              | `true`                   | Enable this middleware                                                                                              |
+| `type`               | `mixed`             | `main`                   | Entity type, use `NULL` to select all types, `FALSE` to disable DB                                                  | 
+| `allowList`          | `array`             | `[]`                     | Custom allow list, will merge to DB items.                                                                          |
+| `blockList`          | `array`             | `[]`                     | Custom block list, will merge to DB items.                                                                          |
+| `allowAsFirst`       | `bool`              | `false`                  | When use custom list, if an IP is in both allow and block list, this option will decide which rule is first.        |
+| `excludes`           | `?Closure or array` | `null`                   | Exclude some paths from firewall, support closure or array, if path match any exclude rule, firewall will not work. |
+| `defaultAction`      | `IpRuleKind`        | `IpRuleKind::ALLOW`      | If no IP matched, this option will decide to allow or block this IP.                                                |
+| `logger`             | `LoggerInterface`   | `string` or `NullLogger` | Logger instance or logger name, default is `NullLogger`.                                                            |
+| `afterHit`           | `?Closure`          | `null`                   | A hook that will be called after an IP was blocked, you can do something or log in this hook.                       |
+| `cacheTtl`           | `int`               | `3600`                   | Cache lifetime in seconds, default is 3600 seconds.                                                                 |
+| `clearExpiredChance` | `number`            | `1/100`                  | Every request has this chance to clear expired cache, default is `1/100`, set `0` to disable.                       |
+
 ## Cache
 
 ### Cache Lifetime
@@ -373,12 +410,11 @@ The cache files is located at `caches/firewall/`, and you can add `firewall` to 
 
 ```json
         "post-autoload-dump": [
-            ...
-            "php windwalker cache:clear renderer html firewall" <-- Add firewall 
-        ],
+...
+"php windwalker cache:clear renderer html firewall" <-- Add firewall
+],
 ```
 
 ### Cache Disable
 
 Cache will disable in debug mode or when `ttl` set to `0`.
-
