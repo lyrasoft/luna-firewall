@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Windwalker\Core\Application\AppContext;
+use Windwalker\Core\Middleware\RoutingExcludesTrait;
 use Windwalker\Data\Collection;
 use Windwalker\Uri\Uri;
 
@@ -18,6 +19,8 @@ use function Windwalker\collect;
 
 class RedirectMiddleware implements MiddlewareInterface
 {
+    use RoutingExcludesTrait;
+
     public function __construct(
         protected RedirectService $redirectService,
         protected AppContext $app,
@@ -25,7 +28,7 @@ class RedirectMiddleware implements MiddlewareInterface
         protected string|\BackedEnum|array|false|null $type = 'main',
         protected array|\Closure|null $list = null,
         protected bool $instantRedirect = false,
-        protected array $ignores = [],
+        protected array $excludes = [],
         protected ?\Closure $afterHit = null,
         protected int $cacheTtl = 3600,
     ) {
@@ -40,17 +43,13 @@ class RedirectMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        if ($this->isExclude()) {
+            return $handler->handle($request);
+        }
+
         $uri = clone $this->app->getSystemUri();
         $uri = $uri->withPath(rtrim($this->app->getSystemUri()->route, '/'));
         $route = trim($uri->toString(Uri::URI), '/');
-
-        if ($this->ignores) {
-            foreach ($this->ignores as $ignore) {
-                if (fnmatch($ignore, $route)) {
-                    return $handler->handle($request);
-                }
-            }
-        }
 
         $redirects = collect();
 
@@ -151,5 +150,10 @@ class RedirectMiddleware implements MiddlewareInterface
     protected function getAvailableRedirects(): Collection
     {
         return $this->redirectService->getAvailableRedirects($this->type, $this->cacheTtl);
+    }
+
+    public function getExcludes(): mixed
+    {
+        return $this->excludes;
     }
 }
