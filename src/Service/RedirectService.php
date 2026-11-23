@@ -124,10 +124,25 @@ class RedirectService
         $dest = $redirect->dest;
 
         if ($redirect->isRegexEnabled()) {
+            $isExternalDest = $this->isExternalUrl($dest);
+
             $dest = $this->replaceVariables($dest, (array) $matches);
+
+            // Captured values must not turn a local destination into an external URL (Open Redirect)
+            if (!$isExternalDest && $this->isExternalUrl($dest)) {
+                return null;
+            }
         }
 
         return [$dest, $redirect];
+    }
+
+    protected function isExternalUrl(string $url): bool
+    {
+        // Browsers ignore whitespace and control characters inside URLs
+        $url = preg_replace('/[\x00-\x20\x7F]/', '', $url);
+
+        return (bool) preg_match('#^([a-z][a-z0-9+.\-]*:|[/\\\\]{2})#i', $url);
     }
 
     /**
