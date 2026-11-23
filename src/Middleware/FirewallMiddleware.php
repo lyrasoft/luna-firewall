@@ -73,8 +73,8 @@ class FirewallMiddleware implements MiddlewareInterface
             $ipRules->push(...$this->ipListToRuleEntities($this->allowList, IpRuleKind::ALLOW));
             $ipRules->push(...$this->ipListToRuleEntities($this->blockList, IpRuleKind::BLOCK));
         } else {
-            $ipRules->push(...$this->ipListToRuleEntities($this->allowList, IpRuleKind::ALLOW));
             $ipRules->push(...$this->ipListToRuleEntities($this->blockList, IpRuleKind::BLOCK));
+            $ipRules->push(...$this->ipListToRuleEntities($this->allowList, IpRuleKind::ALLOW));
         }
 
         $matchedRule = $this->firewallService->matchRule(
@@ -105,6 +105,7 @@ class FirewallMiddleware implements MiddlewareInterface
             $rule = new IpRule();
             $rule->range = $ip;
             $rule->kind = $kind;
+            $rules[] = $rule;
         }
 
         return $rules;
